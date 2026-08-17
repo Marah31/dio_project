@@ -23,32 +23,47 @@ class ProductUI extends ConsumerWidget {
         elevation: 0,
         centerTitle: false,
       ),
-      body: productsAsync.when(
-        data: (products) {
-          if (products.isEmpty) {
-            return const _EmptyState();
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            itemCount: products.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return _ProductCard(
-                key: ValueKey(product.id), 
-                product: product,          
-              );
+      body: Column(
+        children: [
+          Expanded(child: productsAsync.when(
+          data: (products) {
+            if (products.isEmpty) {
+              return const _EmptyState();
+            }
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return _ProductCard(
+                  key: ValueKey(product.id), 
+                  product: product,          
+                );
+              },
+            );
+          },
+          loading: () =>
+              const Center(child: CircularProgressIndicator(strokeWidth: 3)),
+          error: (error, stack) {
+            developer.log(error.toString(), stackTrace: stack);
+            return _ErrorState(error: error); 
+          },) ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Dummy Screen')),
+                    body: const Center(child: Text('Navigated away!')),
+                  ),
+                ) );
             },
-          );
-        },
-        loading: () =>
-            const Center(child: CircularProgressIndicator(strokeWidth: 3)),
-        error: (error, stack) {
-          developer.log(error.toString(), stackTrace: stack);
-          return _ErrorState(error: error); 
-        },
-      ),
-    );
+            child: const Text('Simulate Navigation Away'),
+          )
+        ],
+      )   
+      );
   }
 }
 

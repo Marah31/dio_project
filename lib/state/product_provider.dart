@@ -1,4 +1,5 @@
-import 'package:dio_project/api_client.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_project/core/network/api_client.dart';
 import 'package:dio_project/domain/entity/product_entity.dart';
 import 'package:dio_project/repository/product_repository.dart';
 import 'package:dio_project/repository/product_repository_impl.dart';
@@ -15,7 +16,11 @@ final productRepositoryProvider = Provider<ProductRepository>((Ref ref) {
   return ProductRepositoryImpl(apiClient);
 });
 
-final productsProvider = FutureProvider<List<ProductEntity>>((Ref ref) async {
+final productsProvider = FutureProvider.autoDispose<List<ProductEntity>>((
+  Ref ref,
+) async {
+  final cancelToken = CancelToken();
+  ref.onDispose(() => cancelToken.cancel('User navigated away mid-request.'));
   final repository = ref.watch(productRepositoryProvider);
   return repository.getProducts();
 });

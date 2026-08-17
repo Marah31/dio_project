@@ -1,5 +1,6 @@
-import 'package:dio_project/model/productEntity.dart';
-import 'package:dio_project/state/productProvider.dart';
+import 'dart:developer' as developer;
+import 'package:dio_project/domain/entity/product_entity.dart';
+import 'package:dio_project/state/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,14 +33,20 @@ class ProductUI extends ConsumerWidget {
             itemCount: products.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              return _ProductCard(product: products[index]);
+              final product = products[index];
+              return _ProductCard(
+                key: ValueKey(product.id), 
+                product: product,          
+              );
             },
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(strokeWidth: 3),
-        ),
-        error: (error, stack) => _ErrorState(error: error),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(strokeWidth: 3)),
+        error: (error, stack) {
+          developer.log(error.toString(), stackTrace: stack);
+          return _ErrorState(error: error); 
+        },
       ),
     );
   }
@@ -48,7 +55,7 @@ class ProductUI extends ConsumerWidget {
 class _ProductCard extends StatelessWidget {
   final ProductEntity product;
 
-  const _ProductCard({required this.product});
+  const _ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -104,13 +111,13 @@ class _ProductCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     _CategoryChip(label: product.categoryName),
                     const SizedBox(height: 8),
-                    //const SizedBox(height: 6),
-                    // _CategoryChip(label: product.description),
-                    // const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.star_border_rounded,
-                            size: 16, color: Color(0xFFFFB800)),
+                        const Icon(
+                          Icons.star_border_rounded,
+                          size: 16,
+                          color: Color(0xFFFFB800),
+                        ),
                         const SizedBox(width: 5),
                         Text(
                           product.rating.toStringAsFixed(1),
@@ -180,14 +187,17 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.inventory_2_outlined,
-              size: 48, color: Color(0xFFB0B0BE)),
-          const SizedBox(height: 12),
-          const Text(
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 48,
+            color: Color(0xFFB0B0BE),
+          ),
+          SizedBox(height: 12),
+          Text(
             'No products found',
             style: TextStyle(
               fontSize: 15,
@@ -201,29 +211,34 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _ErrorState extends StatelessWidget {
+class _ErrorState extends ConsumerWidget {
   final Object error;
 
   const _ErrorState({required this.error});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded,
-                size: 44, color: Color(0xFFE05C5C)),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 44,
+              color: Color(0xFFE05C5C),
+            ),
             const SizedBox(height: 12),
-            Text(
-              'Something went wrong\n$error',
+            const Text(
+              'Sorry, try again later :/',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B6B76),
-              ),
+              style: TextStyle(fontSize: 14, color: Color(0xFF6B6B76)),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () => ref.invalidate(productsProvider),
+              child: const Text('Retry'),
             ),
           ],
         ),

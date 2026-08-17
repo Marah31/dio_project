@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 
 class ApiClient {
-  late final Dio dio;
+  final Dio dio;
 
-  ApiClient() {
-    dio = Dio(
+  ApiClient()
+    : dio = Dio(
       BaseOptions(
         baseUrl: 'https://fakestoreapi.com',
         connectTimeout: const Duration(seconds: 10),
@@ -15,5 +15,6 @@ class ApiClient {
         },
       ),
     );
-  }
+  
+  void dispose() => dio.close(force: true);
 }

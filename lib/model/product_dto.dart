@@ -1,5 +1,5 @@
 
-import 'package:dio_project/model/productEntity.dart';
+import 'package:dio_project/domain/entity/product_entity.dart';
 
 class RatingDto {
   final double rate;
@@ -51,7 +51,7 @@ class ProductDto {
       name: title,
       price: price,
       description: description,
-      categoryName: category.toUpperCase(),
+      categoryName: category,
       rating: rating?.rate ?? 0.0,
       ratingCount: rating?.count ?? 0,
     );

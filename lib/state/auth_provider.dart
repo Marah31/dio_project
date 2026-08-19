@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dio_project/state/product_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../token_storage.dart';
+import '../core/storage/token_storage.dart';
 import '../repository/auth_repository_impl.dart';
 
 final tokenStorageProvider = Provider<TokenStorage>((ref) {

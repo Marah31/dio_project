@@ -1,7 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),);
 
   static const _keyAccessToken = 'access_token';
   static const _keyRefreshToken = 'refresh_token';
@@ -15,5 +17,8 @@ class TokenStorage {
   
   Future<String?> getRefreshToken() async => await _storage.read(key: _keyRefreshToken);
 
-  Future<void> clearTokens() async => await _storage.deleteAll();
+  Future<void> clearTokens() async {
+    await _storage.delete(key: _keyAccessToken);
+    await _storage.delete(key: _keyRefreshToken);
+  }
 }

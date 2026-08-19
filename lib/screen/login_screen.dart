@@ -24,10 +24,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
 
-    ref.listen<AsyncValue<AuthStatus>>(authControllerProvider, (previous, next) {
-      if (next.hasError && !next.isLoading) {
+    ref.listen<AuthState>(authControllerProvider, (previous, next) {
+      if (next.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error.toString())),
+          SnackBar(content: Text(next.errorMessage!)),
         );
       }
     });
@@ -43,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
-                hintText: 'enter your email',
+                hintText: 'Enter your email',
               ),
             ),
             const SizedBox(height: 12),
@@ -52,18 +52,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Password',
-                hintText: 'enter your password',
+                hintText: 'Enter your password',
               ),
             ),
             const SizedBox(height: 24),
-            authState.isLoading
+            authState.status == AuthStatus.loading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: () {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text.trim();
                       if (email.isNotEmpty && password.isNotEmpty) {
-                        ref.read(authControllerProvider.notifier).login(email, password);
+                        ref
+                            .read(authControllerProvider.notifier)
+                            .login(email, password);
                       }
                     },
                     child: const Text('Log In'),

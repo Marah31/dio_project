@@ -1,6 +1,8 @@
 import 'dart:developer' as developer;
+import 'package:dio/dio.dart';
 import 'package:dio_project/domain/entity/product_entity.dart';
 import 'package:dio_project/state/auth_notifier.dart';
+import 'package:dio_project/state/auth_provider.dart';
 import 'package:dio_project/state/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,12 +21,14 @@ class ProductUI extends ConsumerWidget {
           'Products',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        actions: [IconButton(
-      icon: const Icon(Icons.logout),
-      onPressed: () {
-        ref.read(authControllerProvider.notifier).logout();
-      },
-    ),],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              ref.read(authControllerProvider.notifier).logout();
+            },
+          ),
+        ],
         backgroundColor: const Color(0xFFF7F7FA),
         foregroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
@@ -32,45 +36,43 @@ class ProductUI extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          Expanded(child: productsAsync.when(
-          data: (products) {
-            if (products.isEmpty) {
-              return const _EmptyState();
-            }
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              itemCount: products.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return _ProductCard(
-                  key: ValueKey(product.id), 
-                  product: product,          
+          Expanded(
+            child: productsAsync.when(
+              data: (products) {
+                if (products.isEmpty) {
+                  return const _EmptyState();
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  itemCount: products.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return _ProductCard(
+                      key: ValueKey(product.id),
+                      product: product,
+                    );
+                  },
                 );
               },
-            );
-          },
-          loading: () =>
-              const Center(child: CircularProgressIndicator(strokeWidth: 3)),
-          error: (error, stack) {
-            developer.log(error.toString(), stackTrace: stack);
-            return _ErrorState(error: error); 
-          },) ),
+              loading: () => const Center(
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              error: (error, stack) {
+                developer.log(error.toString(), stackTrace: stack);
+                return _ErrorState(error: error);
+              },
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(title: const Text('Dummy Screen')),
-                    body: const Center(child: Text('Navigated away!')),
-                  ),
-                ) );
+              testConcurrent401s(ref);
             },
-            child: const Text('Simulate Navigation Away'),
-          )
+            child: const Text('Test concurrency case'),
+          ),
         ],
-      )   
-      );
+      ),
+    );
   }
 }
 
@@ -109,11 +111,6 @@ class _ProductCard extends StatelessWidget {
                   color: const Color(0xFFEFEFF5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                // child: const Icon(
-                //   Icons.shopping_bag_outlined,
-                //   color: Color(0xFFB0B0BE),
-                //   size: 28,
-                // ),
                 child: _buildProductImage(product.image),
               ),
               const SizedBox(width: 14),
@@ -134,32 +131,6 @@ class _ProductCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     _CategoryChip(label: product.categoryName),
                     const SizedBox(height: 8),
-                    // Row(
-                    //   children: [
-                    //     const Icon(
-                    //       Icons.star_border_rounded,
-                    //       size: 16,
-                    //       color: Color(0xFFFFB800),
-                    //     ),
-                    //     const SizedBox(width: 5),
-                    //     Text(
-                    //       product.rating.toStringAsFixed(1),
-                    //       style: const TextStyle(
-                    //         fontSize: 13,
-                    //         fontWeight: FontWeight.w600,
-                    //         color: Color(0xFF1A1A1A),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 4),
-                    //     Text(
-                    //       '(${product.ratingCount})',
-                    //       style: const TextStyle(
-                    //         fontSize: 13,
-                    //         color: Color(0xFF9B9BA6),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),
@@ -214,11 +185,7 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 48,
-            color: Color(0xFFB0B0BE),
-          ),
+          Icon(Icons.inventory_2_outlined, size: 48, color: Color(0xFFB0B0BE)),
           SizedBox(height: 12),
           Text(
             'No products found',
@@ -288,4 +255,34 @@ Widget _buildProductImage(String imageUrl) {
       size: 28,
     ),
   );
+}
+
+Future<void> testConcurrent401s(WidgetRef ref) async {
+  final apiClient = ref.read(apiClientProvider);
+  final tokenStorage = ref.read(tokenStorageProvider);
+
+  final realRefreshToken = await tokenStorage.getRefreshToken();
+
+  if (realRefreshToken == null || realRefreshToken.isEmpty) {
+    developer.log('Please log in through the UI first!');
+    return;
+  }
+
+  await tokenStorage.saveTokens(
+    accessToken: 'EXPIRED_OR_INVALID_JWT_TOKEN',
+    refreshToken: realRefreshToken,
+  );
+
+  developer.log(
+    '\n--- STARTING CONCURRENCY TEST: FIRING 3 SIMULTANEOUS REQUESTS ---',
+  );
+
+  await Future.wait([
+    apiClient.dio.get('/rest/v1/items?select=*'),
+    apiClient.dio.get('/rest/v1/items?select=*'),
+    apiClient.dio.get('/rest/v1/items?select=*'),
+  ]).catchError((err) {
+    developer.log('Test finished: $err');
+    return <Response>[];
+  });
 }

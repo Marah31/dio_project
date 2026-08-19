@@ -9,16 +9,14 @@ class RouterNotifier extends ChangeNotifier {
   final Ref ref;
 
   RouterNotifier(this.ref) {
-    ref.listen<AsyncValue<AuthStatus>>(
+    ref.listen<AuthState>(
       authControllerProvider,
       (_, __) => notifyListeners(),
     );
   }
 }
 
-final routerNotifierProvider = Provider<RouterNotifier>(
-  (ref) => RouterNotifier(ref),
-);
+final routerNotifierProvider = Provider<RouterNotifier>((ref) => RouterNotifier(ref));
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -29,20 +27,19 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
 
-      final status = authState.whenOrNull(
-        data: (status) => status,
-      ) ?? AuthStatus.unauthenticated;
-      final isAuthenticated = status == AuthStatus.authenticated;
+      final isAuthenticated = authState.status == AuthStatus.authenticated;
       final isLoggingIn = state.matchedLocation == '/login';
 
       if (!isAuthenticated && !isLoggingIn) return '/login';
-
       if (isAuthenticated && isLoggingIn) return '/products';
 
       return null;
     },
     routes: [
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
       GoRoute(
         path: '/products',
         builder: (context, state) => const ProductUI(),

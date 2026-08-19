@@ -9,8 +9,6 @@ abstract class ProductEntity with _$ProductEntity {
     required double price,
     required String description,
     required String categoryName,
-    // required double rating,
-    // required int ratingCount,
     required String image,
   }) = _ProductEntity;
 

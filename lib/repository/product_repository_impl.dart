@@ -17,17 +17,32 @@ class ProductRepositoryImpl implements ProductRepository {
         '/rest/v1/items?select=*',
         cancelToken: cancelToken,
       );
-      //print('RAW RESPONSE FROM SUPABASE: ${response.data}');
       final data = response.data;
-      return await Isolate.run(()  => _parseProducts(data));
+      return await Isolate.run(() => _parseProducts(data));
     } on DioException catch (error, stackTrace) {
       if (error.error is AppException) {
-        developer.log('An appException error occurred parsing products: $error', error: error, stackTrace: stackTrace,);
+        final appException = error.error as AppException;
+        developer.log(
+          'AppException in getProducts: ${appException.runtimeType}',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        throw appException;
       }
+
+      developer.log(
+        'Unmapped Dio error in getProducts: ${error.message}',
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw const UnknownException();
     } catch (error, stackTrace) {
-        developer.log('An unknown error occurred parsing products: $error', error: error, stackTrace: stackTrace,);
-        throw const UnknownException('Failed to process server response.');
+      developer.log(
+        'Non-Dio error occurred in getProducts: $error',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw const UnknownException('Failed to process server response.');
     }
   }
 }

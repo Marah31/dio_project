@@ -1,17 +1,12 @@
 import 'package:dio/dio.dart';
-
+import 'dart:developer' as developer;
 class LoggingInterceptor extends Interceptor {
   LoggingInterceptor();
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.extra['startTime'] = DateTime.now();
-    print(
-      'REQUEST[${options.method}] => PATH: ${options.path}',
-    );
+    developer.log('REQUEST[${options.method}] => PATH: ${options.path}');
     super.onRequest(options, handler);
   }
 
@@ -25,7 +20,7 @@ class LoggingInterceptor extends Interceptor {
         ? DateTime.now().difference(startTime)
         : 'N/A';
 
-    print(
+    developer.log(
       'RESPONSE[${response.statusCode}] DURATION: $duration => PATH: ${response.requestOptions.path}',
     );
     super.onResponse(response, handler);
@@ -38,12 +33,12 @@ class LoggingInterceptor extends Interceptor {
         ? DateTime.now().difference(startTime)
         : 'N/A';
 
-    final centralError = err.error; 
-    final displayError = centralError != null 
-        ? centralError.toString() 
+    final centralError = err.error;
+    final displayError = centralError != null
+        ? centralError.toString()
         : (err.response?.statusCode?.toString() ?? err.type.name);
 
-    print(
+    developer.log(
       'ERROR[$displayError] DURATION: $duration => PATH: ${err.requestOptions.path}',
     );
 

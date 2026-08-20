@@ -1,9 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'screen/product_screen.dart';
+import 'core/router/app_router.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -11,16 +12,17 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Fake Store App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const ProductUI(),
+      routerConfig: router,
     );
   }
 }

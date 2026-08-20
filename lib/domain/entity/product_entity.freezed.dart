@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProductEntity {
 
- int get id; String get name; double get price; String get description; String get categoryName; double get rating; int get ratingCount;
+ int get id; String get name; double get price; String get description; String get categoryName; String get image;
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ProductEntityCopyWith<ProductEntity> get copyWith => _$ProductEntityCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&(identical(other.description, description) || other.description == description)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.ratingCount, ratingCount) || other.ratingCount == ratingCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&(identical(other.description, description) || other.description == description)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.image, image) || other.image == image));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,price,description,categoryName,rating,ratingCount);
+int get hashCode => Object.hash(runtimeType,id,name,price,description,categoryName,image);
 
 @override
 String toString() {
-  return 'ProductEntity(id: $id, name: $name, price: $price, description: $description, categoryName: $categoryName, rating: $rating, ratingCount: $ratingCount)';
+  return 'ProductEntity(id: $id, name: $name, price: $price, description: $description, categoryName: $categoryName, image: $image)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ProductEntityCopyWith<$Res>  {
   factory $ProductEntityCopyWith(ProductEntity value, $Res Function(ProductEntity) _then) = _$ProductEntityCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, double price, String description, String categoryName, double rating, int ratingCount
+ int id, String name, double price, String description, String categoryName, String image
 });
 
 
@@ -62,16 +62,15 @@ class _$ProductEntityCopyWithImpl<$Res>
 
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? price = null,Object? description = null,Object? categoryName = null,Object? rating = null,Object? ratingCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? price = null,Object? description = null,Object? categoryName = null,Object? image = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as double,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,categoryName: null == categoryName ? _self.categoryName : categoryName // ignore: cast_nullable_to_non_nullable
-as String,rating: null == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
-as double,ratingCount: null == ratingCount ? _self.ratingCount : ratingCount // ignore: cast_nullable_to_non_nullable
-as int,
+as String,image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -156,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  double price,  String description,  String categoryName,  double rating,  int ratingCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  double price,  String description,  String categoryName,  String image)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductEntity() when $default != null:
-return $default(_that.id,_that.name,_that.price,_that.description,_that.categoryName,_that.rating,_that.ratingCount);case _:
+return $default(_that.id,_that.name,_that.price,_that.description,_that.categoryName,_that.image);case _:
   return orElse();
 
 }
@@ -177,10 +176,10 @@ return $default(_that.id,_that.name,_that.price,_that.description,_that.category
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  double price,  String description,  String categoryName,  double rating,  int ratingCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  double price,  String description,  String categoryName,  String image)  $default,) {final _that = this;
 switch (_that) {
 case _ProductEntity():
-return $default(_that.id,_that.name,_that.price,_that.description,_that.categoryName,_that.rating,_that.ratingCount);case _:
+return $default(_that.id,_that.name,_that.price,_that.description,_that.categoryName,_that.image);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +196,10 @@ return $default(_that.id,_that.name,_that.price,_that.description,_that.category
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  double price,  String description,  String categoryName,  double rating,  int ratingCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  double price,  String description,  String categoryName,  String image)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductEntity() when $default != null:
-return $default(_that.id,_that.name,_that.price,_that.description,_that.categoryName,_that.rating,_that.ratingCount);case _:
+return $default(_that.id,_that.name,_that.price,_that.description,_that.categoryName,_that.image);case _:
   return null;
 
 }
@@ -212,7 +211,7 @@ return $default(_that.id,_that.name,_that.price,_that.description,_that.category
 
 
 class _ProductEntity extends ProductEntity {
-  const _ProductEntity({required this.id, required this.name, required this.price, required this.description, required this.categoryName, required this.rating, required this.ratingCount}): super._();
+  const _ProductEntity({required this.id, required this.name, required this.price, required this.description, required this.categoryName, required this.image}): super._();
   
 
 @override final  int id;
@@ -220,8 +219,7 @@ class _ProductEntity extends ProductEntity {
 @override final  double price;
 @override final  String description;
 @override final  String categoryName;
-@override final  double rating;
-@override final  int ratingCount;
+@override final  String image;
 
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +231,16 @@ _$ProductEntityCopyWith<_ProductEntity> get copyWith => __$ProductEntityCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&(identical(other.description, description) || other.description == description)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.ratingCount, ratingCount) || other.ratingCount == ratingCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&(identical(other.description, description) || other.description == description)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.image, image) || other.image == image));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,price,description,categoryName,rating,ratingCount);
+int get hashCode => Object.hash(runtimeType,id,name,price,description,categoryName,image);
 
 @override
 String toString() {
-  return 'ProductEntity(id: $id, name: $name, price: $price, description: $description, categoryName: $categoryName, rating: $rating, ratingCount: $ratingCount)';
+  return 'ProductEntity(id: $id, name: $name, price: $price, description: $description, categoryName: $categoryName, image: $image)';
 }
 
 
@@ -253,7 +251,7 @@ abstract mixin class _$ProductEntityCopyWith<$Res> implements $ProductEntityCopy
   factory _$ProductEntityCopyWith(_ProductEntity value, $Res Function(_ProductEntity) _then) = __$ProductEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, double price, String description, String categoryName, double rating, int ratingCount
+ int id, String name, double price, String description, String categoryName, String image
 });
 
 
@@ -270,16 +268,15 @@ class __$ProductEntityCopyWithImpl<$Res>
 
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? price = null,Object? description = null,Object? categoryName = null,Object? rating = null,Object? ratingCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? price = null,Object? description = null,Object? categoryName = null,Object? image = null,}) {
   return _then(_ProductEntity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as double,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,categoryName: null == categoryName ? _self.categoryName : categoryName // ignore: cast_nullable_to_non_nullable
-as String,rating: null == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
-as double,ratingCount: null == ratingCount ? _self.ratingCount : ratingCount // ignore: cast_nullable_to_non_nullable
-as int,
+as String,image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

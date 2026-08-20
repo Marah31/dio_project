@@ -1,5 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:dio_project/domain/entity/product_entity.dart';
 
 abstract class ProductRepository {
-  Future<List<ProductEntity>> getProducts();
+  Future<List<ProductEntity>> getProducts({CancelToken? cancelToken});
 }

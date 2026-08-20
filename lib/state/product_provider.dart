@@ -22,5 +22,5 @@ final productsProvider = FutureProvider.autoDispose<List<ProductEntity>>((
   final cancelToken = CancelToken();
   ref.onDispose(() => cancelToken.cancel('User navigated away mid-request.'));
   final repository = ref.watch(productRepositoryProvider);
-  return repository.getProducts(cancelToken: cancelToken);
+  return repository.getProducts(cancelToken: cancelToken,);
 });

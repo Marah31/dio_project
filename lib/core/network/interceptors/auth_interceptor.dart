@@ -30,6 +30,9 @@ class AuthInterceptor extends Interceptor {
         options.headers['Authorization'] = 'Bearer $accessToken';
         options.extra['sentWith'] = accessToken;
       }
+      developer.log(
+        'AUTH TOKEN ATTACHED: ${accessToken != null && accessToken.isNotEmpty}',
+      );
 
       handler.next(options);
     } catch (e) {

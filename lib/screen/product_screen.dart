@@ -3,16 +3,54 @@ import 'package:dio/dio.dart';
 import 'package:dio_project/domain/entity/product_entity.dart';
 import 'package:dio_project/state/auth_notifier.dart';
 import 'package:dio_project/state/auth_provider.dart';
+import 'package:dio_project/state/page_state.dart';
 import 'package:dio_project/state/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
-class ProductUI extends ConsumerWidget {
+class ProductUI extends ConsumerStatefulWidget {
   const ProductUI({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final productsAsync = ref.watch(productsProvider);
+  ConsumerState<ProductUI> createState() => _ProductUIState();
+}
+
+class _ProductUIState extends ConsumerState<ProductUI> {
+  final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(pageProvider.notifier).fetchNextPage();
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      ref.read(pageProvider.notifier).searchProducts(query);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pageState = ref.watch(pageProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7FA),
@@ -34,44 +72,70 @@ class ProductUI extends ConsumerWidget {
         elevation: 0,
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: productsAsync.when(
-              data: (products) {
-                if (products.isEmpty) {
-                  return const _EmptyState();
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                  itemCount: products.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return _ProductCard(
-                      key: ValueKey(product.id),
-                      product: product,
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(strokeWidth: 3),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: TextField(
+                  onChanged: _onSearchChanged,
+                  decoration: const InputDecoration(
+                    hintText: 'Search product..',
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  ),
+                ),
               ),
-              error: (error, stack) {
-                developer.log(error.toString(), stackTrace: stack);
-                return _ErrorState(error: error);
-              },
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              testConcurrent401s(ref);
-            },
-            child: const Text('Test concurrency case'),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Expanded(child: _buildBody(pageState)),
+            ElevatedButton(
+              onPressed: () {
+                testConcurrent401s(ref);
+              },
+              child: const Text('Test concurrency case'),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildBody(PageState pageState) {
+    if (pageState.products.isEmpty && pageState.isLoadingMore) {
+      return const Center(child: CircularProgressIndicator(strokeWidth: 3));
+    }
+
+    if (pageState.products.isEmpty) {
+      return const _EmptyState();
+    }
+
+    return ListView.separated(
+      controller: _scrollController,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      itemCount: pageState.products.length + (pageState.isLoadingMore ? 1 : 0),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        if (index == pageState.products.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
+          );
+        }
+
+        final product = pageState.products[index];
+        return _ProductCard(key: ValueKey(product.id), product: product);
+      },
     );
   }
 }
@@ -135,13 +199,22 @@ class _ProductCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                '\$${product.price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF2E7D5B),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\$${product.price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color.fromARGB(255, 24, 113, 173),
+                    ),
+                  ),
+                  FavoriteButton(
+                    productId: product.id,
+                    isFavorite: product.isFavorite,
+                  ),
+                ],
               ),
             ],
           ),
@@ -285,4 +358,42 @@ Future<void> testConcurrent401s(WidgetRef ref) async {
     developer.log('Test finished: $err');
     return <Response>[];
   });
+}
+
+class FavoriteButton extends ConsumerWidget {
+  final int productId;
+  final bool isFavorite;
+
+  const FavoriteButton({
+    super.key,
+    required this.productId,
+    required this.isFavorite,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      icon: Icon(
+        isFavorite ? Icons.favorite : Icons.favorite_border,
+        color: isFavorite ? Colors.red : Colors.grey,
+      ),
+      onPressed: () async {
+        try {
+          await ref.read(pageProvider.notifier).toggleFavorite(productId);
+        } catch (_) {
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Favorite update failed. Your change was reverted.',
+                ),
+              ),
+            );
+        }
+      },
+    );
+  }
 }

@@ -10,6 +10,7 @@ abstract class ProductEntity with _$ProductEntity {
     required String description,
     required String categoryName,
     required String image,
+    required bool isFavorite,
   }) = _ProductEntity;
 
   const ProductEntity._();

@@ -43,7 +43,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/products',
         builder: (context, state) => const ProductUI(),
-      ),
-    ],
+      ),]
   );
 });

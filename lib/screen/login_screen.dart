@@ -59,6 +59,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             authState.status == AuthStatus.loading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepOrange,
+                                foregroundColor: Colors.white,
+                              ),
                     onPressed: () {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text.trim();
@@ -70,6 +74,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                     child: const Text('Log In'),
                   ),
+            const SizedBox(height: 20,),
+            Text('For testing, use the following:'),
+            Text('Email: test@gmail.com'),
+            Text('Password: 123456'),
           ],
         ),
       ),
